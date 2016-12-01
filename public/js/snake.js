@@ -16,12 +16,12 @@
 	var snakeColor = "green";
 
 	//Game variables
-        var numberOfPortals = 1;
 	var maxSnakeLength = 10;
 	var score;
 	var timeInterval = 80;
 	var startTime = -1;
 	var currentTime = 0;
+	var snakePoolSize = 5;
 
 	var iguana = {
 		x:0,
@@ -33,23 +33,23 @@
 		x:0,
 		y:0,
 		length:Math.floor(Math.random * (maxSnakeLength+1)),
-		positions:[[],[]]
+		direction:"left"
 	};
-        var portals = {
-                x1:[],
-                x2:[],
-                y1:[],
-                y2:[]
-        };
+
 	var snakes = [];
-
-	/*for (var i = 0; i <= snakePool; i++) {
-		snakes[i] = snake;
-	}*/
-
 
 	// resize the canvas to fill browser window dynamically
 	window.addEventListener('resize', resizeCanvas, false);
+
+	/*function initSnakes(){
+		alert("helo");
+		for (var i = 0; i < snakePoolSize; i++) {
+			snakes[i] = snake;
+			snakes[i].length = 1//Math.floor(Math.random * (maxSnakeLength+1));
+			snakes[i].x = Math.floor(Math.random * w);
+			snakes[i].y = Math.floor(Math.random * h);
+		}
+	}();*/
 
 	function resizeCanvas(){
 		cW = window.innerWidth;
@@ -58,14 +58,13 @@
 		h = Math.floor(cH/tileSize);
 		canvas.width = cW;
 		canvas.height = cH;
-		//paint();
 	}
 
 	resizeCanvas();
 	
 	function paintMap(){
-		for (var x=0; x<w; x++){
-			for (var y=0; y<h; y++){
+		for (var x=0; x<=w; x++){
+			for (var y=0; y<=h; y++){
 				paintTile(x,y,boardColor);
 			}
 		}
@@ -75,13 +74,9 @@
 		paintTile(iguana.x,iguana.y,iguanaColor);
 	}
 
-	function paintSnake(s){
-		paintTile(s.x,s.y,snakeColor);
-	}
-
 	function paintAllSnakes(){
 		for (var i=0; i<snakes.length; i++){
-			paintSnake(snakes[i]);
+			paintTile(snakes[i].x,snakes[i].y,snakeColor);
 		}
 	}
 
@@ -93,17 +88,17 @@
 	function paintScore(){
 		context.font="20px Georgia";
 		context.fillText("Score: "+parseInt(currentTime-startTime).toFixed(0),cW-100,cH-50);
-		//context.fillText("x: "+iguana.x+", y: "+iguana.y,50,50);
+		context.fillText("x: "+iguana.x+", y: "+iguana.y,50,50);
 	}
 
 	function paint(){
 		paintMap();
+		//paintScore();
 		paintIguana();
-		context.fillText("OutofBoundsCheck",50,50);
-		paintScore();
+		paintAllSnakes();
 	}
-        
-	function move(){
+
+	function moveIguana(){
 		if(iguana.direction === 'left'){
 			iguana.x--;
 		}else if(iguana.direction === 'up'){
@@ -128,6 +123,25 @@
 		}
 	}
 
+	function moveSnakes(){
+			//always go left
+		for (var i = 0; i < snakePoolSize; i++) {
+			snakes[i].x -= 1;
+			var io = isOutOfBounds(snakes[i].x,snakes[i].y);
+			if(io){
+				if(io === 1){
+					snakes[i].x = 0;
+				}else if(io === 2){
+					snakes[i].x = w;
+				}else if(io === 3){
+					snakes[i].y = 0;
+				}else{
+					snakes[i].y = h;
+				}
+			}
+		}
+	}
+
 	function isOutOfBounds(x,y){
 		if(x > w){
 			return 1;
@@ -141,64 +155,31 @@
 			return 0;
 		}
 	}
-        //Canvas events
-        //Still need to check for overlapping portals and make a check for the 
-        //iguana bumping into them (maybe best to do it in combination with the snake checks
-        function makePortals(){
-            for (var i = 0; i < numberOfPortals; i++){
-                portals[i].x1 = getNonDuplicateX();
-                portals[i].y1 = getNonDuplicateY();
-                portals[i].x2 = getNonDuplicateX();
-                portals[i].y2 = getNonDuplicateY();
-                paintTile(portal.x1, portal.y1, "orange");
-                paintTile(portal.x2, portal.y2, "blue");
-                
-            }
-            function getNonDuplicateX(){
-                var x = Math.random() * cW;
-                for(var i = 0; i < x1.length; i++){
-                    if(x === x1[i]){
-                        return getNonDuplicateX();
-                    } else {
-                        continue;
-                    }
-                }
-                for(var i = 0; i < x2.length; i++){
-                    if(x === x2[i]){
-                        return getNonDuplicateX();
-                    } else {
-                        continue;
-                    }
-                }
-                return x;
-            }
-            function getNonDuplicateY(y){
-                var y = Math.random() * cH;
-                for(var i = 0; i < y1.length; i++){
-                    if(x === y1[i]){
-                        return getNonDuplicateX();
-                    } else {
-                        continue;
-                    }
-                }
-                for(var i = 0; i < y2.length; i++){
-                    if(x === y2[i]){
-                        return getNonDuplicateX();
-                    } else {
-                        continue;
-                    }
-                }
-                return y;
-            }
-        }
-        
+
+	function getRandomDirection(){
+		var dir = Math.floor(Math.random * 3+1);
+		if(dir === 0){
+			return "left";
+		}else if(dir === 1){
+			return "up";
+		}else if(dir === 2){
+			return "right";
+		}else if(dir === 3){
+			return "down";
+		}else{
+			return "down";//safeguard
+		}
+	}
+
 	var gameloop = function gameLoop(){
 
 		if(startTime === -1){
 			startTime = performance.now();
 		}
 		currentTime = performance.now();
-		move();
+		moveIguana();
+		alert('here');
+		moveSnakes();
 		paint();
 	}
 
