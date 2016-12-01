@@ -16,6 +16,7 @@
 	var snakeColor = "green";
 
 	//Game variables
+        var numberOfPortals = 1;
 	var maxSnakeLength = 10;
 	var score;
 	var timeInterval = 80;
@@ -144,14 +145,50 @@
         //Still need to check for overlapping portals and make a check for the 
         //iguana bumping into them (maybe best to do it in combination with the snake checks
         function makePortals(){
-            for (var i = 0; i < 1; i++){
-                portals[i].x1 = Math.random() * cW;
-                portals[i].y1 = Math.random() * cH;
-                portals[i].x2 = Math.random() * cW;
-                portals[i].y2 = Math.random() * cH;
+            for (var i = 0; i < numberOfPortals; i++){
+                portals[i].x1 = getNonDuplicateX();
+                portals[i].y1 = getNonDuplicateY();
+                portals[i].x2 = getNonDuplicateX();
+                portals[i].y2 = getNonDuplicateY();
                 paintTile(portal.x1, portal.y1, "orange");
                 paintTile(portal.x2, portal.y2, "blue");
                 
+            }
+            function getNonDuplicateX(){
+                var x = Math.random() * cW;
+                for(var i = 0; i < x1.length; i++){
+                    if(x === x1[i]){
+                        return getNonDuplicateX();
+                    } else {
+                        continue;
+                    }
+                }
+                for(var i = 0; i < x2.length; i++){
+                    if(x === x2[i]){
+                        return getNonDuplicateX();
+                    } else {
+                        continue;
+                    }
+                }
+                return x;
+            }
+            function getNonDuplicateY(y){
+                var y = Math.random() * cH;
+                for(var i = 0; i < y1.length; i++){
+                    if(x === y1[i]){
+                        return getNonDuplicateX();
+                    } else {
+                        continue;
+                    }
+                }
+                for(var i = 0; i < y2.length; i++){
+                    if(x === y2[i]){
+                        return getNonDuplicateX();
+                    } else {
+                        continue;
+                    }
+                }
+                return y;
             }
         }
         
