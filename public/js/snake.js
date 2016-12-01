@@ -16,6 +16,7 @@
 	var snakeColor = "green";
 
 	//Game variables
+        var numberOfPortals = 2;
 	var maxSnakeLength = 10;
 	var score;
 	var timeInterval = 80;
@@ -35,10 +36,20 @@
 		this.length = Math.floor(Math.random() * (maxSnakeLength+1)),
 		this.direction = "left"
 	}
-
 	var snakes = new Array();
-
-	// resize the canvas to fill browser window dynamically
+        var portals = {
+            x1:[],
+            y1:[],
+            x2:[],
+            y2:[]
+        }
+        function Portals(x1,y1,x2,y2){
+            this.x1 = x1,
+            this.y1 = y1,
+            this.x2 = x2,
+            this.y2 = y2
+        };
+        // resize the canvas to fill browser window dynamically
 	window.addEventListener('resize', resizeCanvas, false);
 
 	function initSnakes(){
@@ -76,7 +87,15 @@
 			paintTile(snakes[i].x,snakes[i].y,snakeColor);
 		}
 	}
-
+        function paintPortals(){
+            for(var i = 0; i < numberOfPortals; i++){
+                console.log("Tries to paint");
+                console.log(portals.x1[i]);
+                console.log(portals.y1[i]);
+                paintTile(portals.x1[i], portals.y1[i], "#FF8C00");
+                paintTile(portals.x2[i], portals.y2[i], "#00BFFF");
+            }       
+        }
 	function paintTile(x,y,color){
 		context.fillStyle = color;
 		context.fillRect(x*tileSize,y*tileSize,tileSize,tileSize);
@@ -93,6 +112,7 @@
 		//paintScore();
 		paintIguana();
 		paintAllSnakes();
+                paintPortals();
 	}
 
 	function moveIguana(){
@@ -166,11 +186,61 @@
 			return "down";//safeguard
 		}
 	}
-
+        function makePortals(){
+            for (var i = 0; i < numberOfPortals; i++){
+                console.log("Tries to make a portal")
+                portals.x1[i] = Math.round(getNonDuplicateX());
+                portals.y1[i] = Math.round(getNonDuplicateY());
+                portals.x2[i] = Math.round(getNonDuplicateX());
+                portals.y2[i] = Math.round(getNonDuplicateY());
+                console.log(cW);
+                console.log(Math.random());
+                console.log(portals.x1[i]);
+                console.log(portals.y1[i]);
+                
+            }
+            function getNonDuplicateX(){
+                var x = Math.random() * w;
+                for(var i = 0; i < portals.x1.length; i++){
+                    if(x === portals.x1[i]){
+                        return getNonDuplicateX();
+                    } else {
+                        continue;
+                    }
+                }
+                for(var i = 0; i < portals.x2.length; i++){
+                    if(x === portals.x2[i]){
+                        return getNonDuplicateX();
+                    } else {
+                        continue;
+                    }
+                }
+                return x;
+            }
+            function getNonDuplicateY(){
+                var y = Math.random() * h;
+                for(var i = 0; i < portals.y1.length; i++){
+                    if(y === portals.y1[i]){
+                        return getNonDuplicateX();
+                    } else {
+                        continue;
+                    }
+                }
+                for(var i = 0; i < portals.y2.length; i++){
+                    if(y === portals.y2[i]){
+                        return getNonDuplicateX();
+                    } else {
+                        continue;
+                    }
+                }
+                return y;
+            }
+        }
+        makePortals();
 	var gameloop = function gameLoop(){
 
 		if(snakes.length === 0){
-			initSnakes();
+			//initSnakes();
 		}
 
 		if(startTime === -1){
