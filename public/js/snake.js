@@ -34,7 +34,12 @@
 		length:Math.floor(Math.random * (maxSnakeLength+1)),
 		positions:[[],[]]
 	};
-
+        var portals = {
+                x1:[],
+                x2:[],
+                y1:[],
+                y2:[]
+        };
 	var snakes = [];
 
 	/*for (var i = 0; i <= snakePool; i++) {
@@ -96,7 +101,7 @@
 		context.fillText("OutofBoundsCheck",50,50);
 		paintScore();
 	}
-
+        
 	function move(){
 		if(iguana.direction === 'left'){
 			iguana.x--;
@@ -135,7 +140,21 @@
 			return 0;
 		}
 	}
-
+        //Canvas events
+        //Still need to check for overlapping portals and make a check for the 
+        //iguana bumping into them (maybe best to do it in combination with the snake checks
+        function makePortals(){
+            for (var i = 0; i < 1; i++){
+                portals[i].x1 = Math.random() * cW;
+                portals[i].y1 = Math.random() * cH;
+                portals[i].x2 = Math.random() * cW;
+                portals[i].y2 = Math.random() * cH;
+                paintTile(portal.x1, portal.y1, "orange");
+                paintTile(portal.x2, portal.y2, "blue");
+                
+            }
+        }
+        
 	var gameloop = function gameLoop(){
 
 		if(startTime === -1){
