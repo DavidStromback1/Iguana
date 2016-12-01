@@ -89,9 +89,9 @@
 	}
         function paintPortals(){
             for(var i = 0; i < numberOfPortals; i++){
-                console.log("Tries to paint");
-                console.log(portals.x1[i]);
-                console.log(portals.y1[i]);
+                //var color = getRandomColor();
+                //paintTile(portals.x1[i], portals.y1[i], color);
+                //paintTile(portals.x2[i], portals.y2[i], color);
                 paintTile(portals.x1[i], portals.y1[i], "#FF8C00");
                 paintTile(portals.x2[i], portals.y2[i], "#00BFFF");
             }       
@@ -188,16 +188,10 @@
 	}
         function makePortals(){
             for (var i = 0; i < numberOfPortals; i++){
-                console.log("Tries to make a portal")
                 portals.x1[i] = Math.round(getNonDuplicateX());
                 portals.y1[i] = Math.round(getNonDuplicateY());
                 portals.x2[i] = Math.round(getNonDuplicateX());
                 portals.y2[i] = Math.round(getNonDuplicateY());
-                console.log(cW);
-                console.log(Math.random());
-                console.log(portals.x1[i]);
-                console.log(portals.y1[i]);
-                
             }
             function getNonDuplicateX(){
                 var x = Math.random() * w;
