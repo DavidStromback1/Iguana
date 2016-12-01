@@ -181,25 +181,25 @@
         //iguana bumping into them (maybe best to do it in combination with the snake checks
         function makePortals(){
             for (var i = 0; i < numberOfPortals; i++){
-                portals[i].x1 = getNonDuplicateX();
-                portals[i].y1 = getNonDuplicateY();
-                portals[i].x2 = getNonDuplicateX();
-                portals[i].y2 = getNonDuplicateY();
+                portals.x1[i] = getNonDuplicateX();
+                portals.y1[i] = getNonDuplicateY();
+                portals.x2[i] = getNonDuplicateX();
+                portals.y2[i] = getNonDuplicateY();
                 paintTile(portals.x1, portals.y1, "orange");
                 paintTile(portals.x2, portals.y2, "blue");
                  
             }
             function getNonDuplicateX(){
                  var x = Math.random() * cW;
-                 for(var i = 0; i < x1.length; i++){
-                     if(x === x1[i]){
+                 for(var i = 0; i < portals.x1.length; i++){
+                     if(x === portals.x1[i]){
                          return getNonDuplicateX();
                      } else {
                          continue;
                      }
                  }
-                 for(var i = 0; i < x2.length; i++){
-                     if(x === x2[i]){
+                 for(var i = 0; i < portals.x2.length; i++){
+                     if(x === portals.x2[i]){
                          return getNonDuplicateX();
                      } else {
                          continue;
@@ -209,15 +209,15 @@
              }
             function getNonDuplicateY(y){
                  var y = Math.random() * cH;
-                 for(var i = 0; i < y1.length; i++){
-                     if(x === y1[i]){
+                 for(var i = 0; i < portals.y1.length; i++){
+                     if(y === portals.y1[i]){
                          return getNonDuplicateX();
                      } else {
                          continue;
                      }
                  }
-                 for(var i = 0; i < y2.length; i++){
-                     if(x === y2[i]){
+                 for(var i = 0; i < portals.y2.length; i++){
+                     if(y === portals.y2[i]){
                          return getNonDuplicateX();
                      } else {
                          continue;
@@ -226,7 +226,7 @@
                  return y;
              }
         }
-        makePortals();
+        //makePortals();
         
 	var gameloop = function gameLoop(){
 
