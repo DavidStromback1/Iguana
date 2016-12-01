@@ -16,6 +16,7 @@
 	var snakeColor = "green";
 
 	//Game variables
+        var numberOfPortals = 1;
 	var maxSnakeLength = 10;
 	var score;
 	var timeInterval = 80;
@@ -37,7 +38,13 @@
 	};
 
 	var snakes = [];
-
+        
+        var portals = {
+                 x1:[],
+                 x2:[],
+                 y1:[],
+                 y2:[]
+         };
 	// resize the canvas to fill browser window dynamically
 	window.addEventListener('resize', resizeCanvas, false);
 
@@ -170,7 +177,57 @@
 			return "down";//safeguard
 		}
 	}
-
+        //Still need to check for overlapping portals and make a check for the 
+        //iguana bumping into them (maybe best to do it in combination with the snake checks
+        function makePortals(){
+            for (var i = 0; i < numberOfPortals; i++){
+                portals[i].x1 = getNonDuplicateX();
+                portals[i].y1 = getNonDuplicateY();
+                portals[i].x2 = getNonDuplicateX();
+                portals[i].y2 = getNonDuplicateY();
+                paintTile(portals.x1, portals.y1, "orange");
+                paintTile(portals.x2, portals.y2, "blue");
+                 
+            }
+            function getNonDuplicateX(){
+                 var x = Math.random() * cW;
+                 for(var i = 0; i < x1.length; i++){
+                     if(x === x1[i]){
+                         return getNonDuplicateX();
+                     } else {
+                         continue;
+                     }
+                 }
+                 for(var i = 0; i < x2.length; i++){
+                     if(x === x2[i]){
+                         return getNonDuplicateX();
+                     } else {
+                         continue;
+                     }
+                 }
+                 return x;
+             }
+            function getNonDuplicateY(y){
+                 var y = Math.random() * cH;
+                 for(var i = 0; i < y1.length; i++){
+                     if(x === y1[i]){
+                         return getNonDuplicateX();
+                     } else {
+                         continue;
+                     }
+                 }
+                 for(var i = 0; i < y2.length; i++){
+                     if(x === y2[i]){
+                         return getNonDuplicateX();
+                     } else {
+                         continue;
+                     }
+                 }
+                 return y;
+             }
+        }
+        makePortals();
+        
 	var gameloop = function gameLoop(){
 
 		if(startTime === -1){
