@@ -21,7 +21,7 @@
 	var timeInterval = 80;
 	var startTime = -1;
 	var currentTime = 0;
-	var snakePoolSize = 5;
+	var snakePoolSize = 50;
 
 	var iguana = {
 		x:0,
@@ -29,27 +29,24 @@
 		direction:"down"
 	};
 
-	var snake = {
-		x:0,
-		y:0,
-		length:Math.floor(Math.random * (maxSnakeLength+1)),
-		direction:"left"
-	};
+	function Snake(x,y){
+		this.x = x,
+		this.y = y,
+		this.length = Math.floor(Math.random() * (maxSnakeLength+1)),
+		this.direction = "left"
+	}
 
-	var snakes = [];
+	var snakes = new Array();
 
 	// resize the canvas to fill browser window dynamically
 	window.addEventListener('resize', resizeCanvas, false);
 
-	/*function initSnakes(){
-		alert("helo");
+	function initSnakes(){
 		for (var i = 0; i < snakePoolSize; i++) {
-			snakes[i] = snake;
+			snakes[i] = new Snake(Math.floor(Math.random() * (w+1)),Math.floor(Math.random() * (h+1)));
 			snakes[i].length = 1//Math.floor(Math.random * (maxSnakeLength+1));
-			snakes[i].x = Math.floor(Math.random * w);
-			snakes[i].y = Math.floor(Math.random * h);
 		}
-	}();*/
+	}
 
 	function resizeCanvas(){
 		cW = window.innerWidth;
@@ -124,8 +121,7 @@
 	}
 
 	function moveSnakes(){
-			//always go left
-		for (var i = 0; i < snakePoolSize; i++) {
+		for (var i = 0; i < snakes.length; i++) {
 			snakes[i].x -= 1;
 			var io = isOutOfBounds(snakes[i].x,snakes[i].y);
 			if(io){
@@ -157,7 +153,7 @@
 	}
 
 	function getRandomDirection(){
-		var dir = Math.floor(Math.random * 3+1);
+		var dir = Math.floor(Math.random() * 3+1);
 		if(dir === 0){
 			return "left";
 		}else if(dir === 1){
@@ -173,12 +169,16 @@
 
 	var gameloop = function gameLoop(){
 
+		if(snakes.length === 0){
+			initSnakes();
+		}
+
 		if(startTime === -1){
 			startTime = performance.now();
 		}
 		currentTime = performance.now();
+		
 		moveIguana();
-		alert('here');
 		moveSnakes();
 		paint();
 	}
