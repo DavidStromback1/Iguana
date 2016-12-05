@@ -43,12 +43,6 @@
             x2:[],
             y2:[]
         }
-        function Portals(x1,y1,x2,y2){
-            this.x1 = x1,
-            this.y1 = y1,
-            this.x2 = x2,
-            this.y2 = y2
-        };
         // resize the canvas to fill browser window dynamically
 	window.addEventListener('resize', resizeCanvas, false);
 
@@ -138,8 +132,25 @@
 				iguana.y = h;
 			}
 		}
+                collisionCheck();
 	}
-
+        function collisionCheck(){
+            for(var i = 0; i < portals.x1.length; i++){
+                if(portals.x1[i] === iguana.x){
+                    if(portals.y1[i] === iguana.y){
+                        iguana.x = portals.x2[i];
+                        iguana.y = portals.y2[i];
+                        break;
+                    }
+                } else if(portals.x2[i] === iguana.x){
+                    if(portals.y2[i] === iguana.y){
+                        iguana.x = portals.x1[i];
+                        iguana.y = portals.y1[i];
+                        break;
+                    }
+                }
+            }
+        }
 	function moveSnakes(){
 		for (var i = 0; i < snakes.length; i++) {
 			snakes[i].x -= 1;
