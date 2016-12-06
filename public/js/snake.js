@@ -1,129 +1,270 @@
-(function() {
+var canvas = document.getElementById('canvas');
+var context = canvas.getContext('2d');
 
-	var canvas = document.getElementById('canvas');
-	var context = canvas.getContext('2d');
+var tileSize = 30;
+var cW = window.innerWidth;
+var cH = window.innerHeight;
+var w = Math.floor(cW/tileSize);
+var h = Math.floor(cH/tileSize);
 
-	//Tilemap variables
-	var tileSize = 25;
-	var cW = window.innerWidth;
-	var cH = window.innerHeight;
-	var w = Math.floor(cW/tileSize);
-	var h = Math.floor(cH/tileSize);
+//Graphical variables
+var boardColor = "#ffdf80";
+var iguanaColor = "black";
+var snakeColor = "green";
 
-	//Graphical variables
-	var boardColor = "#ffdf80";
-	var iguanaColor = "black";
-	var snakeColor = "green";
+var boardColorINV = "#141919";
+var iguanaColorINV = "#FFFFFF";
+var snakeColorINV = "#1F2727";
 
-	//Game variables
-	var maxSnakeLength = 10;
-	var score;
-	var timeInterval = 80;
-	var startTime = -1;
-	var currentTime = 0;
-	var snakePoolSize = 50;
+//Game variables
+var maxSnakeLength = 10;
+var ticks = 0;
+var score = 0;
+var timeInterval = 20;
+var gameSpeed = 2;
+var startTime = -1;
+var currentTime = 0;
+var numberOfPortals = 1;
+var snakePoolSize = 20;
+var directions = [0,1,2,3]; //left, up, right, down
+var switchMin = 75;
+var activeSnakes = 1;
+var shadowCnt = 0;
+var shadowRealm = false;
 
-	var iguana = {
-		x:0,
-		y:0,
-		direction:"down"
-	};
+var iguana = {
+	x:Math.floor(w/2),
+	y:Math.floor(h/2),
+	direction:3,
+	trip:0
+};
 
-	function Snake(x,y){
-		this.x = x,
-		this.y = y,
-		this.length = Math.floor(Math.random() * (maxSnakeLength+1)),
-		this.direction = "left"
-	}
+function Snake(){
+	this.x = Math.floor(Math.random() * (w+1));
+	this.y = Math.floor(Math.random() * (h+1));
+	this.length = Math.floor(Math.random() * maxSnakeLength+5);
+	this.direction = directions[Math.floor(Math.random() * (4))];
+	this.positions = [[this.x,this.y]];
+	this.count = 0;
+	this.switchRate = Math.floor(Math.random() * switchMin + switchMin);
+	this.active = 0;
+}
 
-	var snakes = new Array();
+var vortex = {
+	x:Math.floor(Math.random() * (w+1)),
+	y:Math.floor(Math.random() * (h+1)),
+	eaten:false
+}
 
-	// resize the canvas to fill browser window dynamically
-	window.addEventListener('resize', resizeCanvas, false);
+var snakes = new Array();
 
-	function initSnakes(){
-		for (var i = 0; i < snakePoolSize; i++) {
-			snakes[i] = new Snake(Math.floor(Math.random() * (w+1)),Math.floor(Math.random() * (h+1)));
-			snakes[i].length = 1//Math.floor(Math.random * (maxSnakeLength+1));
-		}
-	}
+var portals = {
+    x1:[],
+    y1:[],
+    x2:[],
+    y2:[]
+}
 
-	function resizeCanvas(){
-		cW = window.innerWidth;
-		cH = window.innerHeight;
-		w = Math.floor(cW/tileSize);
-		h = Math.floor(cH/tileSize);
-		canvas.width = cW;
-		canvas.height = cH;
-	}
-
-	resizeCanvas();
-	
-	function paintMap(){
-		for (var x=0; x<=w; x++){
-			for (var y=0; y<=h; y++){
-				paintTile(x,y,boardColor);
+function initSnakes(){
+	for (var i = 0; i < snakePoolSize; i++) {
+		snakes[i] = new Snake();
+		if(snakes[i].direction === 0){
+			for (var j = 1; j < snakes[i].length; j++) {
+				snakes[i].positions[j] = [snakes[i].x+j,snakes[i].y];
+			}
+		}else if(snakes[i].direction === 1){
+			for (var j = 1; j < snakes[i].length; j++) {
+				snakes[i].positions[j] = [snakes[i].x,snakes[i].y+j];
+			}
+		}else if(snakes[i].direction === 2){
+			for (var j = 1; j < snakes[i].length; j++) {
+				snakes[i].positions[j] = [snakes[i].x-j,snakes[i].y];
+			}
+		}else if(snakes[i].direction === 3){
+			for (var j = 1; j < snakes[i].length; j++) {
+				snakes[i].positions[j] = [snakes[i].x,snakes[i].y-j];
 			}
 		}
 	}
+	snakes[0].active = 1;
+}
 
-	function paintIguana(){
+function paintIguana(){
+	if(shadowRealm)
+		paintTile(iguana.x,iguana.y,iguanaColorINV);
+	else
 		paintTile(iguana.x,iguana.y,iguanaColor);
-	}
+}
 
-	function paintAllSnakes(){
+function paintAllSnakes(){
+	if(shadowRealm){
 		for (var i=0; i<snakes.length; i++){
-			paintTile(snakes[i].x,snakes[i].y,snakeColor);
+			for (var j = 0; j < snakes[i].length; j++) {
+				if(snakes[i].active){
+					paintTile(snakes[i].positions[j][0],snakes[i].positions[j][1],snakeColorINV);
+				}
+			}	
+		}
+	}else{
+		for (var i=0; i<snakes.length; i++){
+			for (var j = 0; j < snakes[i].length; j++) {
+				if(snakes[i].active){
+					paintTile(snakes[i].positions[j][0],snakes[i].positions[j][1],snakeColor);
+				}
+			}	
 		}
 	}
+}
 
-	function paintTile(x,y,color){
-		context.fillStyle = color;
-		context.fillRect(x*tileSize,y*tileSize,tileSize,tileSize);
+function paintPortals(){
+    for(var i = 0; i < numberOfPortals; i++){
+        paintTile(portals.x1[i], portals.y1[i], "#FF8C00");
+    	paintTile(portals.x2[i], portals.y2[i], "#00BFFF");
+    }       
+}
+
+function paintTile(x,y,color){
+	context.fillStyle = color;
+	context.fillRect(x*tileSize,y*tileSize,tileSize,tileSize);
+}
+
+function paintScore(){
+	context.font="30px Courier New";
+	if(shadowRealm){
+		context.fillStyle = iguanaColorINV;
+		context.fillText("2X",20,cH-15);
+	}else{
+		context.fillStyle = iguanaColor;
 	}
+	context.fillText("Score: "+score,70,cH-15);
+	
+}
 
-	function paintScore(){
-		context.font="20px Georgia";
-		context.fillText("Score: "+parseInt(currentTime-startTime).toFixed(0),cW-100,cH-50);
-		context.fillText("x: "+iguana.x+", y: "+iguana.y,50,50);
+function addScore(){
+	if(shadowRealm){
+		score += 2;
+	}else{
+		score++;
 	}
-
-	function paint(){
-		paintMap();
-		//paintScore();
-		paintIguana();
-		paintAllSnakes();
-	}
-
-	function moveIguana(){
-		if(iguana.direction === 'left'){
-			iguana.x--;
-		}else if(iguana.direction === 'up'){
-			iguana.y--;
-		}else if(iguana.direction === 'right'){
-			iguana.x++;
-		}else if(iguana.direction === 'down'){
-			iguana.y++;
-		}
-
-		var io = isOutOfBounds(iguana.x,iguana.y);
-		if(io){
-			if(io === 1){
-				iguana.x = 0;
-			}else if(io === 2){
-				iguana.x = w;
-			}else if(io === 3){
-				iguana.y = 0;
-			}else{
-				iguana.y = h;
+	
+	if(!(score % 100)){//adds more snakes as time goes on
+		activeSnakes++;
+		for (var i = 0; i < snakePoolSize; i++) {
+			if(i < activeSnakes){
+				snakes[i].active = 1;
 			}
 		}
 	}
+}
 
-	function moveSnakes(){
-		for (var i = 0; i < snakes.length; i++) {
-			snakes[i].x -= 1;
+function paint(){
+	context.clearRect(0, 0, cW, cH);
+	if(shadowRealm){
+   		context.fillStyle = boardColorINV;
+   	}else{
+		context.fillStyle = boardColor;
+   	}
+   	context.rect(0, 0, cW, cH);
+	context.fill();
+	paintIguana();
+	paintAllSnakes();
+	if(!vortex.eaten)
+		paintTile(vortex.x,vortex.y,"red");
+	paintScore();
+	paintPortals();
+}
+
+function moveIguana(){
+
+	if(iguana.direction === 0){
+		iguana.x--;
+	}else if(iguana.direction === 1){
+		iguana.y--;
+	}else if(iguana.direction === 2){
+		iguana.x++;
+	}else if(iguana.direction === 3){
+		iguana.y++;
+	}
+	var io = isOutOfBounds(iguana.x,iguana.y);
+	
+	if(io){
+		if(io === 1){
+			iguana.x = 0;
+		}else if(io === 2){
+			iguana.x = w;
+		}else if(io === 3){
+			iguana.y = 0;
+		}else{
+			iguana.y = h;
+		}
+	}
+
+	collisionCheck();
+	collisionSnakeCheck();
+	
+	if(shadowRealm){
+		shadowCnt++;
+		if(shadowCnt > 250){
+			shadowCnt = 0;
+			shadowRealm = false;
+			gameSpeed /= 2;
+		}
+	}
+	if(iguana.x === vortex.x && iguana.y === vortex.y){
+		shadowRealm = true;
+		vortex.eaten = true;
+		gameSpeed *= 2;
+	}
+}
+
+function collisionCheck(){
+    for(var i = 0; i < portals.x1.length; i++){
+        if(portals.x1[i] === iguana.x){
+            if(portals.y1[i] === iguana.y){
+                iguana.x = portals.x2[i];
+                iguana.y = portals.y2[i];
+                break;
+            }
+        } else if(portals.x2[i] === iguana.x){
+            if(portals.y2[i] === iguana.y){
+                iguana.x = portals.x1[i];
+                iguana.y = portals.y1[i];
+                break;
+            }
+        }
+    }
+}
+
+function collisionSnakeCheck(){
+    for(var i = 0; i < snakes.length; i++){
+        if(snakes[i].x === iguana.x){
+            if(snakes[i].y === iguana.y){
+                console.log("DEAD");
+                break;
+            }
+        }
+    }
+}
+
+function moveSnakes(){
+	for (var i = 0; i < snakes.length; i++) {
+		if(snakes[i].active){
+			if(snakes[i].count > snakes[i].switchRate){
+				snakes[i].count = 0;
+				snakes[i].direction = switchDirection(snakes[i].direction);
+			}
+			snakes[i].count++;
+			if(snakes[i].direction === 0){
+				snakes[i].x -= 1;
+			}else if(snakes[i].direction === 1){
+				snakes[i].y -= 1;
+			}else if(snakes[i].direction === 2){
+				snakes[i].x += 1;
+			}else if(snakes[i].direction === 3){
+				snakes[i].y += 1;
+			}
 			var io = isOutOfBounds(snakes[i].x,snakes[i].y);
+
 			if(io){
 				if(io === 1){
 					snakes[i].x = 0;
@@ -135,44 +276,93 @@
 					snakes[i].y = h;
 				}
 			}
+			snakes[i].positions.pop();
+			snakes[i].positions.unshift([snakes[i].x,snakes[i].y]);
 		}
 	}
+}
 
-	function isOutOfBounds(x,y){
-		if(x > w){
-			return 1;
-		}else if(x < 0){
-			return 2;
-		}else if(y > h){
-			return 3;
-		}else if(y < 0){
-			return 4;
-		}else{
-			return 0;
+function isOutOfBounds(x,y){
+	if(x > w){
+		return 1;
+	}else if(x < 0){
+		return 2;
+	}else if(y > h){
+		return 3;
+	}else if(y < 0){
+		return 4;
+	}else{
+		return 0;
+	}
+}
+
+function switchDirection(direction){
+	var dirNum = Math.floor(Math.random() * (3));
+	if(direction === 0 || direction === 2){
+		while(dirNum === 0 || dirNum === 2){
+			dirNum = Math.floor(Math.random() * 4);
+		}
+	}else{
+		while(dirNum === 1 || dirNum === 3){
+			dirNum = Math.floor(Math.random() * 4);
 		}
 	}
+	return directions[dirNum];
+}
 
-	function getRandomDirection(){
-		var dir = Math.floor(Math.random() * 3+1);
-		if(dir === 0){
-			return "left";
-		}else if(dir === 1){
-			return "up";
-		}else if(dir === 2){
-			return "right";
-		}else if(dir === 3){
-			return "down";
-		}else{
-			return "down";//safeguard
-		}
-	}
+function makePortals(){
+    for (var i = 0; i < numberOfPortals; i++){
+        portals.x1[i] = Math.round(getNonDuplicateX());
+        portals.y1[i] = Math.round(getNonDuplicateY());
+        portals.x2[i] = Math.round(getNonDuplicateX());
+        portals.y2[i] = Math.round(getNonDuplicateY());
+    }
+    function getNonDuplicateX(){
+        var x = Math.random() * w;
+            for(var i = 0; i < portals.x1.length; i++){
+                if(x === portals.x1[i]){
+                    return getNonDuplicateX();
+                } else {
+                    continue;
+                }
+            }
+        for(var i = 0; i < portals.x2.length; i++){
+            if(x === portals.x2[i]){
+                return getNonDuplicateX();
+            } else {
+                continue;
+            }
+        }
+        return x;
+    }
+    function getNonDuplicateY(){
+	    var y = Math.random() * h;
+        for(var i = 0; i < portals.y1.length; i++){
+            if(y === portals.y1[i]){
+                return getNonDuplicateX();
+            } else {
+                continue;
+            }
+        }
+        for(var i = 0; i < portals.y2.length; i++){
+            if(y === portals.y2[i]){
+                return getNonDuplicateX();
+            } else {
+                continue;
+            }
+        }
+        return y;
+    }
+}
 
-	var gameloop = function gameLoop(){
+var gameloop = function gameLoop(){
 
+	if(ticks - gameSpeed === 0){
+		ticks = 0;
 		if(snakes.length === 0){
 			initSnakes();
+			makePortals();
 		}
-
 		if(startTime === -1){
 			startTime = performance.now();
 		}
@@ -180,25 +370,39 @@
 		
 		moveIguana();
 		moveSnakes();
+		addScore();
 		paint();
 	}
+	ticks++;
+}
 
-	document.addEventListener('keydown', function(event) {
-		if(event.keyCode == 37) {
-			iguana.direction = 'left';
-		}
-		else if(event.keyCode == 38){
-			iguana.direction = 'up';
-		}
-		else if(event.keyCode == 39) {
-			iguana.direction = 'right';
-		}
-		else if(event.keyCode == 40){
-			iguana.direction = 'down';
-		}
-	});
+window.addEventListener('resize', resizeCanvas, false);
 
-	setInterval(gameloop,timeInterval);
 
-})();
+function resizeCanvas(){
+	cW = window.innerWidth;
+	cH = window.innerHeight;
+	w = Math.floor(cW/tileSize);
+	h = Math.floor(cH/tileSize);
+	canvas.width = cW;
+	canvas.height = cH;
+}
 
+resizeCanvas();
+
+document.addEventListener('keydown', function(event) {
+	if(event.keyCode == 37) {
+		iguana.direction = 0;
+	}
+	else if(event.keyCode == 38){
+		iguana.direction = 1;
+	}
+	else if(event.keyCode == 39) {
+		iguana.direction = 2;
+	}
+	else if(event.keyCode == 40){
+		iguana.direction = 3;
+	}
+});
+
+setInterval(gameloop,timeInterval);
