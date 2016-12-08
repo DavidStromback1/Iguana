@@ -16,6 +16,7 @@
 	var snakeColor = "green";
 
 	//Game variables
+        var alive = 1;
         var numberOfPortals = 2;
 	var maxSnakeLength = 10;
 	var score;
@@ -256,6 +257,12 @@
 		moveIguana();
 		moveSnakes();
 		paint();
+                if(alive){
+                    console.log("Loops");
+                } else {
+                    alert("Game Over");
+                    clearInterval(intervalID);
+                }
 	}
 
 	document.addEventListener('keydown', function(event) {
@@ -272,8 +279,20 @@
 			iguana.direction = 'down';
 		}
 	});
-
-	setInterval(gameloop,timeInterval);
+        //First initialisation of GameLoop if you want to restart just click the screen!
+        createGameLoop();
+        document.addEventListener('click', function(event){
+            //Reset game call game loop and reinitialise all the variables
+            createGameLoop();
+            makePortals();
+            alive = 1;
+            //Still need to add initialisation for snakes
+        });
+        var intervalID;
+        function createGameLoop(){
+            intervalID = setInterval(gameloop,timeInterval);
+        };
+        
 
 })();
 
