@@ -1,0 +1,149 @@
+        
+/*
+Created on : 03-Dec-2016, 21:55:38
+Author     : Bernie
+*/
+
+
+html, body {
+    background-color: #fff;
+    color: #636b6f;
+    font-family: 'Raleway', sans-serif;
+    font-weight: 100;
+    height: 100vh;
+    margin: 0;
+}
+
+.full-height {
+    height: 100vh;
+}
+
+.flex-center {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+}
+
+.position-ref {
+    position: relative;
+}
+
+.top-right {
+    position: absolute;
+    right: 10px;
+    top: 18px;
+}
+
+.content {
+    text-align: center;
+}
+
+.title {
+    font-size: 84px;
+}
+
+.links > a {
+    color: #636b6f;
+    padding: 0 25px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .1rem;
+    text-decoration: none;
+    text-transform: uppercase;
+}
+
+.m-b-md {
+    margin-bottom: 30px;
+}
+
+#playBTN {
+    display: block;
+    padding: 15px 25px;
+    margin: 30px auto;
+    width: 200px;
+    font-size: 32px;
+    font-weight: 400;
+    letter-spacing: 3px;
+    border-radius: 8px;
+    background-color: #1aa3ff;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s;
+
+}
+
+#playBTN:hover {
+    box-shadow: 0 0 10px #888;
+    transform: scale(1.05);
+    background-color: #0099ff;
+
+}
+
+#playBTN span {
+
+}
+
+#playBTN:hover span{
+
+    font-weight: bold;
+
+}
+
+/*  add main overlay for reg and log, but outside the screen to start */
+.mainOverLayLog, .mainOverLayReg {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 100%;
+    right: 0;
+    z-index: 2;
+    overflow: hidden;
+}
+
+.active-mainOverLay{
+    left: 0%;
+}
+
+.active-mainOverLay .overLay{
+    display: block;
+}
+
+/*  add clickable overlay, position inside of the main overlay */
+.overLay {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: rgba(0,0,0,0.6);
+    z-index: 3;
+    display: none;
+    /*Above the main, so we can click it*/
+}
+
+/*  The content needs to be white and above the overlay */
+.mainOverLayLog .content, .mainOverLayReg .content {
+    background-color: white;
+    border-radius: 12px;
+    padding: 30px;
+    margin: 50px auto;
+    position: relative;
+    z-index: 4;
+    max-width: 600px;
+}
+
+/*This is about the thingy*/
+.welcomeTag {
+    position: fixed;
+    left:20px;
+    top:20px;
+
+}
+
+.welcomeTag span {
+    font-weight:bold;
+}
+
+
+
+

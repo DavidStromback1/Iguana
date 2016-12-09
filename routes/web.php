@@ -11,8 +11,20 @@
 |
 */
 
+Route::group(['middleware' => 'web'], function(){
+    Auth::routes();
+});
+
+Route::get('/logout', function(){
+    Auth::logout();
+    return redirect('/');
+});
+    
+    
 Route::get('/', function () {
-    return view('layout');
+    return view('gameLogin');
 });
 
 Route::get('highscore', 'HighscoreController@index');
+Route::get('/home', 'HomeController@index');
+
