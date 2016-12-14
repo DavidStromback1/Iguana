@@ -25,6 +25,6 @@ Route::get('/', function () {
     return view('gameLogin');
 });
 
-Route::get('highscore', 'HighscoreController@index');
+Route::get('/highscore', 'HighscoreController@index');
 Route::get('/home', 'HomeController@index');
 

@@ -1,6 +1,5 @@
 @extends('layout')
 
-
 @section('content')
 <div class = "flex-center position-ref full-height">
 
@@ -30,16 +29,12 @@
             @include('auth/register')
         </div>
     </div>
-    
-  
-
-    
-    
+      
     <!-- Main content of the page -->
     <div class = "content">
         <div class = "title m-b-md">
             Iguana vs. Snake
-            <div id='playBTN'>Play<span>!</span></div>
+            <a href="snake.php" class="playBTN" id='playBTN'>Play<span>!</span></a>
 
             <!-- Change design a little to look more like game -->
         </div>
