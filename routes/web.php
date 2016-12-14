@@ -1,5 +1,4 @@
 <?php
-
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -10,11 +9,9 @@
 | to using a Closure or controller method. Build something great!
 |
 */
-
 Route::group(['middleware' => 'web'], function(){
     Auth::routes();
 });
-
 Route::get('/logout', function(){
     Auth::logout();
     return redirect('/');
@@ -24,7 +21,5 @@ Route::get('/logout', function(){
 Route::get('/', function () {
     return view('gameLogin');
 });
-
-Route::get('highscore', 'HighscoreController@index');
+Route::get('/highscore', 'HighscoreController@index');
 Route::get('/home', 'HomeController@index');
-
