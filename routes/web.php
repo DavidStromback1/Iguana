@@ -21,5 +21,12 @@ Route::get('/logout', function(){
 Route::get('/', function () {
     return view('gameLogin');
 });
+<<<<<<< HEAD
 Route::get('/highscore', 'HighscoreController@index');
 Route::get('/home', 'HomeController@index');
+=======
+
+Route::get('/highscore', 'HighscoreController@index');
+Route::get('/home', 'HomeController@index');
+
+>>>>>>> 9790a2105962ffc469b93e06e355725250a621b2

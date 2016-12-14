@@ -79,8 +79,8 @@
         <div class="flex-center position-ref full-height">
             
                 <div class="top-right links">
-                    <a href="{{ url('/login') }}">Login</a>
-                    <a href="{{ url('/register') }}">Register</a>
+                    <a href="{{ url('/') }}">Login</a>
+                    <a href="{{ url('/') }}">Register</a>
                 </div>
             
 
@@ -92,7 +92,7 @@
                 <div class = "yourScore">
                 @if(empty($userHighscore))
                     Login to see your highscore!
-                @else
+                @else:
                 
                     Your highscore is {{$userHighscore}}!
                 

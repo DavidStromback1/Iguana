@@ -13,6 +13,7 @@ var $OverLay = $(".overLay");
 var $FormClearName = $("#name");
 var $FormClearEmail = $("#email");
 var $FormClearEmailREG = $modalReg.find("#email");
+var $replayBtn = $("#replayBtn");
 
 
 function btnClickedLog() {
@@ -40,12 +41,22 @@ function overLayDisappearReg() {
     $hasError.removeClass("has-error");
 }
 
+function rerereplay(){
+    console.log("In replay");
+    init();
+}
+
+function removeInstructions(){
+     $(".Instructions").hide();
+}
+
 $(document).ready(function () {
     checkErrorState();
     $LogBtn.on("click", btnClickedLog);
     $RegBtn.on("click", btnClickedReg);
     $OverLay.on("click", overLayDisappearLog);
     $OverLay.on("click", overLayDisappearReg);
+    $replayBtn.on("click", rerereplay);
 });
 
 function checkErrorState() {

@@ -1,116 +1,133 @@
-var canvas = document.getElementById('canvas');
-var context = canvas.getContext('2d');
+var canvas 		= document.getElementById('canvas');
+var ctx 		= canvas.getContext('2d');
+var intervalID;
 
-//Variables
-var tileSize = 30; //Size in px of each tile on the map
-var cW = window.innerWidth; //canvasWidth
-var cH = window.innerHeight; //canvasHeight
-var w = Math.floor(cW/tileSize); //board width
-var h = Math.floor(cH/tileSize); //board height
+var ticks 		= 0;
+var tickTime 	= 25;
+var startTime 	= -1;
+var curTime 	= 0;
+var gameSpeed 	= 1;
 
-var boardColor = "#ffdf80";
-var iguanaColor = "black";
-var snakeColor = "green";
+var tileSize 	= 30;
+var directions 	= [0,1,2,3]; //left, up, right, down
 
-var boardColorINV = "#141919";
-var iguanaColorINV = "#FFFFFF";
-var snakeColorINV = "#1F2727";
+var nOfSnakes 	= 30;
+var maxSnakeLen = 10;
+var chDirTime 	= 75;
+var genTime		= 125;
+var liveSnakes 	= 1;
 
-var maxSnakeLength = 10; //The maximum length in tiles a snake can have
-var ticks = 0; //tick counter
-var score = 0; //score 
-var timeInterval = 20; //How much time in ms there is between ticks
-var gameSpeed = 2; //After how many ticks the game goes into another gameloop
-var startTime = -1; //Start time for score calculation
-var currentTime = 0; //current time
-var numberOfPortals = 1; //How many portal pairs there are in the game
-var snakePoolSize = 20; //How many snakes there will be on the board at full capacity
-var directions = [0,1,2,3]; //left, up, right, down
-var switchMin = 75; //The minimum time a snake will take to change direction
-var activeSnakes = 1; //The amount of activeSnakes
-var shadowCnt = 0; //How many ticks the player has been in the shadowrealm
-var shadowRealm = false; //If the user is in the shadow realm or not
+var shadowCnt 	= 0;
+var shadowTime	= 250;
+var shadowRealm = false;
 
-//Iguana struct
+var score 		= 0;
+var multiplier	= 2;
+var scoreFont	= '40px Courier New';
+var gameOverFont= '270px Courier New';
+
+var nOfPortals 	= 1;
+var oPortalCol	= '#FF8C00';
+var bPortalCol	= '#00BFFF';
+var vortexCol	= '#CC0000';
+
+var boardCol 	= '#FFDF80'; 
+var iguanaCol 	= '#000000';
+var snakeCol 	= '#008000';
+
+var boardColSh 	= '#141919';
+var iguanaColSh = '#FFFFFF';
+var snakeColSh 	= '#151919';
+
+var cW 			= window.innerWidth;
+var cH 			= window.innerHeight;
+var w 			= Math.floor(cW/tileSize)-2;
+var h 			= Math.floor(cH/tileSize)-2;
+
 var iguana = {
 	x:Math.floor(w/2),
 	y:Math.floor(h/2),
-	direction:3,
-	trip:0
+	dir:3,
+	alive:true,
 };
-
-//Snake object
-function Snake(){
-	this.x = Math.floor(Math.random() * (w+1));
-	this.y = Math.floor(Math.random() * (h+1));
-	this.length = Math.floor(Math.random() * maxSnakeLength+5);
-	this.direction = directions[Math.floor(Math.random() * (4))];
-	this.positions = [[this.x,this.y]];
-	this.count = 0;
-	this.switchRate = Math.floor(Math.random() * switchMin + switchMin);
-	this.active = 0;
-}
 
 var vortex = {
 	x:Math.floor(Math.random() * (w+1)),
 	y:Math.floor(Math.random() * (h+1)),
-	eaten:false
-}
-
-var snakes = new Array();
+	used:false
+};
 
 var portals = {
     x1:[],
     y1:[],
     x2:[],
     y2:[]
+};
+
+function Snake(){
+	this.x 		= Math.floor(Math.random() * (w+1));
+	this.y 		= Math.floor(Math.random() * (h+1));
+	this.l 		= Math.floor(Math.random() * maxSnakeLen+5);
+	this.dir 	= directions[Math.floor(Math.random() * (4))];
+	this.rate 	= Math.floor(Math.random() * chDirTime + chDirTime);
+	this.pos 	= [[this.x,this.y]];
+	this.cnt 	= 0;
+	this.live 	= false;
 }
 
+var snakes = new Array();
+
 function initSnakes(){
-	for (var i = 0; i < snakePoolSize; i++) {
+	for (var i = 0; i < nOfSnakes; i++) {
 		snakes[i] = new Snake();
-		if(snakes[i].direction === 0){
-			for (var j = 1; j < snakes[i].length; j++) {
-				snakes[i].positions[j] = [snakes[i].x+j,snakes[i].y];
+		if(snakes[i].dir === 0){
+			for (var j = 1; j < snakes[i].l; j++) {
+				snakes[i].pos[j] = [snakes[i].x+j,snakes[i].y];
 			}
-		}else if(snakes[i].direction === 1){
-			for (var j = 1; j < snakes[i].length; j++) {
-				snakes[i].positions[j] = [snakes[i].x,snakes[i].y+j];
+		}else if(snakes[i].dir === 1){
+			for (var j = 1; j < snakes[i].l; j++) {
+				snakes[i].pos[j] = [snakes[i].x,snakes[i].y+j];
 			}
-		}else if(snakes[i].direction === 2){
-			for (var j = 1; j < snakes[i].length; j++) {
-				snakes[i].positions[j] = [snakes[i].x-j,snakes[i].y];
+		}else if(snakes[i].dir === 2){
+			for (var j = 1; j < snakes[i].l; j++) {
+				snakes[i].pos[j] = [snakes[i].x-j,snakes[i].y];
 			}
-		}else if(snakes[i].direction === 3){
-			for (var j = 1; j < snakes[i].length; j++) {
-				snakes[i].positions[j] = [snakes[i].x,snakes[i].y-j];
+		}else if(snakes[i].dir === 3){
+			for (var j = 1; j < snakes[i].l; j++) {
+				snakes[i].pos[j] = [snakes[i].x,snakes[i].y-j];
 			}
 		}
 	}
-	snakes[0].active = 1;
+	snakes[0].live = true;
+}
+
+function paintTile(x,y,color){
+	ctx.fillStyle = color;
+	ctx.fillRect(x*tileSize,y*tileSize,tileSize,tileSize);
 }
 
 function paintIguana(){
-	if(shadowRealm)
-		paintTile(iguana.x,iguana.y,iguanaColorINV);
-	else
-		paintTile(iguana.x,iguana.y,iguanaColor);
+	if(shadowRealm){
+		paintTile(iguana.x,iguana.y,iguanaColSh);
+	}else{
+		paintTile(iguana.x,iguana.y,iguanaCol);
+	}
 }
 
-function paintAllSnakes(){
+function paintSnakes(){
 	if(shadowRealm){
 		for (var i=0; i<snakes.length; i++){
-			for (var j = 0; j < snakes[i].length; j++) {
-				if(snakes[i].active){
-					paintTile(snakes[i].positions[j][0],snakes[i].positions[j][1],snakeColorINV);
+			for (var j = 0; j < snakes[i].l; j++) {
+				if(snakes[i].live){
+					paintTile(snakes[i].pos[j][0],snakes[i].pos[j][1],snakeColSh);
 				}
 			}	
 		}
 	}else{
 		for (var i=0; i<snakes.length; i++){
-			for (var j = 0; j < snakes[i].length; j++) {
-				if(snakes[i].active){
-					paintTile(snakes[i].positions[j][0],snakes[i].positions[j][1],snakeColor);
+			for (var j = 0; j < snakes[i].l; j++) {
+				if(snakes[i].live){
+					paintTile(snakes[i].pos[j][0],snakes[i].pos[j][1],snakeCol);
 				}
 			}	
 		}
@@ -118,76 +135,76 @@ function paintAllSnakes(){
 }
 
 function paintPortals(){
-    for(var i = 0; i < numberOfPortals; i++){
-        paintTile(portals.x1[i], portals.y1[i], "#FF8C00");
-    	paintTile(portals.x2[i], portals.y2[i], "#00BFFF");
-    }       
-}
+    for(var i = 0; i < nOfPortals; i++){
+        paintTile(portals.x1[i], portals.y1[i], oPortalCol);
+    	paintTile(portals.x2[i], portals.y2[i], bPortalCol);
+    }
 
-function paintTile(x,y,color){
-	context.fillStyle = color;
-	context.fillRect(x*tileSize,y*tileSize,tileSize,tileSize);
+    if(!vortex.used)
+		paintTile(vortex.x,vortex.y,vortexCol);
 }
 
 function paintScore(){
-	context.font="40px Courier New";
+	ctx.font = scoreFont;
 	if(shadowRealm){
-		context.fillStyle = iguanaColorINV;
-		context.fillText("2X",20,cH-15);
+		ctx.fillStyle = iguanaColSh;
+		ctx.fillText(multiplier+'X ',20,cH-15);
 	}else{
-		context.fillStyle = iguanaColor;
+		ctx.fillStyle = iguanaCol;
 	}
-	context.fillText("Score: "+score,70,cH-15);
+	ctx.fillText('Score: '+score,70,cH-15);
 	
 }
 
 function addScore(){
 	if(shadowRealm){
-		score += 2;
+		score += multiplier;
 	}else{
 		score++;
 	}
-	
-	if(!(score % 100)){//adds more snakes as time goes on
-		activeSnakes++;
-		for (var i = 0; i < snakePoolSize; i++) {
-			if(i < activeSnakes){
-				snakes[i].active = 1;
-			}
-		}
-	}
 }
 
+function highscoreOverlay(){
+    var $score = score;
+    var $highscores = $(".highscores");
+    
+    $highscores.show();
+    $("#cScore").html($score);
+}
 function paint(){
-	context.clearRect(0, 0, cW, cH);
-	if(shadowRealm){
-   		context.fillStyle = boardColorINV;
-   	}else{
-		context.fillStyle = boardColor;
-   	}
-   	context.rect(0, 0, cW, cH);
-	context.fill();
-	paintIguana();
-	paintAllSnakes();
-	if(!vortex.eaten)
-		paintTile(vortex.x,vortex.y,"red");
-	paintScore();
-	paintPortals();
+	ctx.clearRect(0, 0, cW, cH);
+	
+	if(!iguana.alive){
+		ctx.fillStyle = iguanaCol;
+		ctx.font = gameOverFont;
+                ctx.textAlign = "center";
+		ctx.fillText("GAME OVER",Math.floor(cW/2),Math.floor(cH/2)+100);
+		ctx.font = scoreFont;
+		ctx.fillText("Score: "+score,Math.floor(cW/2)-130,Math.floor(cH/2)+150);
+		paintSnakes();
+		paintPortals();
+                highscoreOverlay();
+	}else{
+		paintSnakes();
+		paintPortals();
+		paintIguana();
+		paintScore();
+	}
+	
 }
 
 function moveIguana(){
-
-	if(iguana.direction === 0){
+	if(iguana.dir === 0){
 		iguana.x--;
-	}else if(iguana.direction === 1){
+	}else if(iguana.dir === 1){
 		iguana.y--;
-	}else if(iguana.direction === 2){
+	}else if(iguana.dir === 2){
 		iguana.x++;
-	}else if(iguana.direction === 3){
+	}else if(iguana.dir === 3){
 		iguana.y++;
 	}
+
 	var io = isOutOfBounds(iguana.x,iguana.y);
-	
 	if(io){
 		if(io === 1){
 			iguana.x = 0;
@@ -200,26 +217,65 @@ function moveIguana(){
 		}
 	}
 
-	collisionCheck();
-	collisionSnakeCheck();
-	
 	if(shadowRealm){
 		shadowCnt++;
-		if(shadowCnt > 250){
-			shadowCnt = 0;
+		if(shadowCnt > shadowTime){
 			shadowRealm = false;
+			shadowCnt = 0;
 			gameSpeed /= 2;
+			document.getElementById('canvas').style.backgroundColor = boardCol;
+			document.getElementById('canvas').style.backgroundImage = 'none';	
 		}
 	}
-	if(iguana.x === vortex.x && iguana.y === vortex.y){
-		shadowRealm = true;
-		vortex.eaten = true;
-		gameSpeed *= 2;
+
+	collisionCheck();
+}
+
+function moveSnakes(){
+	for (var i = 0; i < snakes.length; i++) {
+		if(snakes[i].live){
+			if(snakes[i].cnt > snakes[i].rate){
+				snakes[i].cnt = 0;
+				snakes[i].dir = switchDirection(snakes[i].dir);
+			}
+			snakes[i].cnt++;
+			if(snakes[i].dir === 0){
+				snakes[i].x -= 1;
+			}else if(snakes[i].dir === 1){
+				snakes[i].y -= 1;
+			}else if(snakes[i].dir === 2){
+				snakes[i].x += 1;
+			}else if(snakes[i].dir === 3){
+				snakes[i].y += 1;
+			}
+
+			var io = isOutOfBounds(snakes[i].x,snakes[i].y);
+			if(io){
+				if(io === 1){
+					snakes[i].x = 0;
+				}else if(io === 2){
+					snakes[i].x = w;
+				}else if(io === 3){
+					snakes[i].y = 0;
+				}else{
+					snakes[i].y = h;
+				}
+			}
+
+			snakes[i].pos.pop();
+			snakes[i].pos.unshift([snakes[i].x,snakes[i].y]);
+		}
 	}
 }
 
 function collisionCheck(){
-    for(var i = 0; i < portals.x1.length; i++){
+	portalCollisionCheck();
+    vortexCollisionCheck();
+    snakeCollisionCheck();
+}
+
+function portalCollisionCheck(){
+	for(var i = 0; i < portals.x1.length; i++){
         if(portals.x1[i] === iguana.x){
             if(portals.y1[i] === iguana.y){
                 iguana.x = portals.x2[i];
@@ -236,52 +292,29 @@ function collisionCheck(){
     }
 }
 
-function collisionSnakeCheck(){
-    for(var i = 0; i < snakes.length; i++){
-        if(snakes[i].x === iguana.x){
-            if(snakes[i].y === iguana.y){
-                console.log("DEAD");
-                break;
-            }
-        }
+function snakeCollisionCheck(){
+	for(var i = 0; i < snakes.length; i++){
+		if(snakes[i].live){
+			for (var j = 0; j < snakes[i].l; j++) {
+				if(snakes[i].pos[j][0] === iguana.x && snakes[i].pos[j][1] === iguana.y){
+		            iguana.alive = false;
+		            break;
+		        }
+	        }
+    	}
     }
 }
 
-function moveSnakes(){
-	for (var i = 0; i < snakes.length; i++) {
-		if(snakes[i].active){
-			if(snakes[i].count > snakes[i].switchRate){
-				snakes[i].count = 0;
-				snakes[i].direction = switchDirection(snakes[i].direction);
-			}
-			snakes[i].count++;
-			if(snakes[i].direction === 0){
-				snakes[i].x -= 1;
-			}else if(snakes[i].direction === 1){
-				snakes[i].y -= 1;
-			}else if(snakes[i].direction === 2){
-				snakes[i].x += 1;
-			}else if(snakes[i].direction === 3){
-				snakes[i].y += 1;
-			}
-			var io = isOutOfBounds(snakes[i].x,snakes[i].y);
-
-			if(io){
-				if(io === 1){
-					snakes[i].x = 0;
-				}else if(io === 2){
-					snakes[i].x = w;
-				}else if(io === 3){
-					snakes[i].y = 0;
-				}else{
-					snakes[i].y = h;
-				}
-			}
-			snakes[i].positions.pop();
-			snakes[i].positions.unshift([snakes[i].x,snakes[i].y]);
-		}
+function vortexCollisionCheck(){
+	if(iguana.x === vortex.x && iguana.y === vortex.y && !vortex.used){
+		shadowRealm = true;
+		vortex.used = true;
+		gameSpeed *= 2;
+		document.getElementById('canvas').style.backgroundColor = 'black';
+		document.getElementById('canvas').style.backgroundImage = 'url(data:image/png;base64,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)';
 	}
 }
+
 
 function isOutOfBounds(x,y){
 	if(x > w){
@@ -298,26 +331,27 @@ function isOutOfBounds(x,y){
 }
 
 function switchDirection(direction){
-	var dirNum = Math.floor(Math.random() * (3));
+	var dirNum = Math.floor(Math.random() * directions.length);
 	if(direction === 0 || direction === 2){
 		while(dirNum === 0 || dirNum === 2){
-			dirNum = Math.floor(Math.random() * 4);
+			dirNum = Math.floor(Math.random() * directions.length);
 		}
 	}else{
 		while(dirNum === 1 || dirNum === 3){
-			dirNum = Math.floor(Math.random() * 4);
+			dirNum = Math.floor(Math.random() * directions.length);
 		}
 	}
 	return directions[dirNum];
 }
 
 function makePortals(){
-    for (var i = 0; i < numberOfPortals; i++){
+    for (var i = 0; i < nOfPortals; i++){
         portals.x1[i] = Math.round(getNonDuplicateX());
         portals.y1[i] = Math.round(getNonDuplicateY());
         portals.x2[i] = Math.round(getNonDuplicateX());
         portals.y2[i] = Math.round(getNonDuplicateY());
     }
+
     function getNonDuplicateX(){
         var x = Math.random() * w;
             for(var i = 0; i < portals.x1.length; i++){
@@ -336,6 +370,7 @@ function makePortals(){
         }
         return x;
     }
+
     function getNonDuplicateY(){
 	    var y = Math.random() * h;
         for(var i = 0; i < portals.y1.length; i++){
@@ -356,29 +391,50 @@ function makePortals(){
     }
 }
 
-var gameloop = function gameLoop(){
+function init(){
+	ticks = 0;
+	score = 0;
+	gameSpeed = 1;
+	liveSnakes = 1;
+	iguana.alive = true;
+	shadowRealm = false;
+	vortex.used = false;
+	vortex.x = Math.floor(Math.random() * (w+1)),
+	vortex.x = Math.floor(Math.random() * (h+1)),
+	ctx.font = scoreFont;
+	document.getElementById('canvas').style.backgroundColor = boardCol;
+	document.getElementById('canvas').style.backgroundImage = 'none';
+	initSnakes();
+	makePortals();
+	
+}
 
+var gameloop = function gameLoop(){
 	if(ticks - gameSpeed === 0){
 		ticks = 0;
-		if(snakes.length === 0){
-			initSnakes();
-			makePortals();
-		}
 		if(startTime === -1){
 			startTime = performance.now();
 		}
-		currentTime = performance.now();
-		
-		moveIguana();
+		curTime = performance.now();
+
 		moveSnakes();
-		addScore();
+		if(iguana.alive){
+            addScore();
+    	}
+		moveIguana();
+
+		if(!(score % genTime)){
+			liveSnakes++;
+			for (var i = 0; i < nOfSnakes; i++) {
+				if(i < liveSnakes){
+					snakes[i].live = true;
+				}
+			}
+		}
 		paint();
 	}
 	ticks++;
 }
-
-window.addEventListener('resize', resizeCanvas, false);
-
 
 function resizeCanvas(){
 	cW = window.innerWidth;
@@ -389,21 +445,25 @@ function resizeCanvas(){
 	canvas.height = cH;
 }
 
+window.addEventListener('resize', resizeCanvas, false);
+
 resizeCanvas();
 
 document.addEventListener('keydown', function(event) {
 	if(event.keyCode == 37) {
-		iguana.direction = 0;
-	}
-	else if(event.keyCode == 38){
-		iguana.direction = 1;
-	}
-	else if(event.keyCode == 39) {
-		iguana.direction = 2;
-	}
-	else if(event.keyCode == 40){
-		iguana.direction = 3;
+		iguana.dir = 0;
+	}else if(event.keyCode == 38){
+		iguana.dir = 1;
+	}else if(event.keyCode == 39) {
+		iguana.dir = 2;
+	}else if(event.keyCode == 40){
+		iguana.dir = 3;
+	}else if(event.keyCode == 82){
+                removeInstructions();
+		init();
+		clearInterval(intervalID);
+		intervalID = setInterval(gameloop,tickTime);
 	}
 });
 
-setInterval(gameloop,timeInterval);
+init();
