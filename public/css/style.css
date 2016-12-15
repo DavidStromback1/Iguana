@@ -167,7 +167,7 @@ html, body {
 .highscores .content {
     position: absolute;
     width: 600px;
-    height: 400px;
+    height: 500px;
     overflow: auto;
     border-radius: 12px;
     background-color: white;
@@ -217,7 +217,18 @@ html, body {
     display: block;
     margin: 20px auto;
     text-transform: none;
-    
-    
 }
 
+#backHome{
+text-transform: uppercase;
+color: #666;
+letter-spacing: 1px;
+text-decoration: none;
+padding: 10px 0;
+font-size: 14px;
+font-weight: bold;
+}
+
+#backHome:hover{
+color: that_same_blue_we_used_for_the_button_above_it
+}

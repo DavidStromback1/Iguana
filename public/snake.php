@@ -1,10 +1,4 @@
 <?php
-//namespace App\Http\Controllers;
-//use App\Http\Controllers\HighscoreController;
-//use Illuminate\Support\Facades\DB;
-//$highscore = DB::table('highscore')->select('highscore', 'user_id')->get();
-//echo $hs;
-//$user = Auth::user();
 ?>
 
 <!DOCTYPE html>
@@ -34,11 +28,12 @@
                     </tr>
                     <tr>
                         <td> Bernie</td>
-                        <td> 10000000 </td>
+                        <td> 577 </td>
                     </tr>
 
                 </table>
                 <a id="replayBtn" class="playBTN" href="snake.php">Play again</a>
+                <a id="backHome"  href="/">&lt; Go back home</a>
             </div>
         </div>
 
