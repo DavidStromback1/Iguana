@@ -202,8 +202,8 @@ function paint(){
 		paintSnakes();
 		paintPortals();
                 if(paintCounter === 1){
-                    highscoreOverlay();
                     getHighscore();
+                    highscoreOverlay();
                 }
                 
                 

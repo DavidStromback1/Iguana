@@ -8,6 +8,7 @@
         <link rel="stylesheet" type="text/css" href="css/snake.css">
     </head>
     <body>
+        <input type="hidden" name="_token" id="token" value="{{ csrf_token() }}">
         <canvas id="canvas">
             <div id="wrapper"></div>
         </canvas>
@@ -34,7 +35,7 @@
                     @endforeach
 
                 </table>
-                <a id="replayBtn" class="playBTN" href="snake.php">Play again</a>
+                <a id="replayBtn" class="playBTN" href="game">Play again</a>
                 <a id="backHome"  href="/">&lt; Go back home</a>
             </div>
         </div>

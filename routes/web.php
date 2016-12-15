@@ -25,21 +25,33 @@ Route::get('/', function () {
 });
 
 Route::get('/game', function () {
-    $highscore = Highscore::all();
+    $highscore = Highscore::all()->sortByDesc("highscore");;
     return view('game', compact('highscore'));
 });
 
 Route::get('/home', 'HomeController@index');
-
 
 Route::post('/getHighscore',function(){
 
     if(Auth::check()){
         $user = Auth::user();
         $score = Input::get('Highscore');
-        $hs = new Highscore();
-        $hs->highscore = $score;
-        $user->highscore()->save($hs);
+        $res = $user->highscore()->get();
+        if($res->count())
+        {
+            if($res[0]->highscore < $score){
+                $oldHS = Highscore::find($res[0]->id);
+                $oldHS->delete();
+                
+                $hs = new Highscore();
+                $hs->highscore = $score;
+                $user->highscore()->save($hs);
+            }
+        }
+        else{
+            $hs = new Highscore();
+            $hs->highscore = $score;
+            $user->highscore()->save($hs);
+        }
     }
 });
-
