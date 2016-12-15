@@ -1,7 +1,7 @@
 # Snake vs Iguana Game!
 Developed by Lucas Vanparijs, Franziska Bernhard, Marciano Geijselaers and David Strömbäck.
 
-![alt tag](/GameScreenshot.png)
+![](https://github.com/DavidStromback1/Iguana/blob/master/GameScreenshot.JPG)
 
 # Laravel PHP Framework
 
