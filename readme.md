@@ -1,4 +1,4 @@
-# Snake vs Iguana Game!
+# Iguana vs Snake Game!
 Developed by Lucas Vanparijs, Franziska Bernhard, Marciano Geijselaers and David Strömbäck.
 
 ![](https://github.com/DavidStromback1/Iguana/blob/master/GameScreenshot.JPG)
