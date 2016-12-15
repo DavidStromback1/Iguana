@@ -11,9 +11,15 @@ class HighscoreController extends Controller
         
         $hs = 100000;
         $user->highscore()->save($hs);
-        
-        $userHighscore = 100;
+
         $highscore = Highscore::all();
         return view('highscore', compact('highscore', 'userHighscore'));
     }
+    
+    public function store($Highscore){
+        $user = Auth::user();
+        $user->highscore()->save($Highscore);
+    }
+    
+    
 }

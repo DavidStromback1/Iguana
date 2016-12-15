@@ -8,6 +8,8 @@ var startTime 	= -1;
 var curTime 	= 0;
 var gameSpeed 	= 1;
 
+var paintCounter = 0;
+
 var tileSize 	= 30;
 var directions 	= [0,1,2,3]; //left, up, right, down
 
@@ -171,10 +173,26 @@ function highscoreOverlay(){
     $highscores.show();
     $("#cScore").html($score);
 }
+
+
+function getHighscore(){
+            var $Hscore = score;
+            $.ajax({
+                method: "POST",
+                url: "/getHighscore",
+                data: {
+                    "_token": $('#token').val(),
+                    "Highscore": $Hscore
+                }
+            });
+         }
+
+
 function paint(){
 	ctx.clearRect(0, 0, cW, cH);
 	
 	if(!iguana.alive){
+                paintCounter++;
 		ctx.fillStyle = iguanaCol;
 		ctx.font = gameOverFont;
                 ctx.textAlign = "center";
@@ -183,7 +201,12 @@ function paint(){
 		ctx.fillText("Score: "+score,Math.floor(cW/2)-130,Math.floor(cH/2)+150);
 		paintSnakes();
 		paintPortals();
-                highscoreOverlay();
+                if(paintCounter === 1){
+                    highscoreOverlay();
+                    getHighscore();
+                }
+                
+                
 	}else{
 		paintSnakes();
 		paintPortals();
