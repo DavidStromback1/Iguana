@@ -34,7 +34,7 @@
     <div class = "content">
         <div class = "title m-b-md">
             Iguana vs. Snake
-            <a href="snake.php" style="text-decoration:none" class="playBTN " id='playBTN'>Play<span>!</span></a>
+            <a href="game" style="text-decoration:none" class="playBTN " id='playBTN'>Play<span>!</span></a>
         </div>
     </div>
 </div>

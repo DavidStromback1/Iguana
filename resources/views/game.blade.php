@@ -1,5 +1,4 @@
-<?php
-?>
+<?php ?>
 
 <!DOCTYPE html>
 <html>
@@ -13,26 +12,26 @@
             <div id="wrapper"></div>
         </canvas>
         <div class="Instructions"><span> Press 'r' to start </span> 
-        Use arrow keys to steer Iguana to safety and try to avoid getting eaten!
-        Check out the portal to the shadow world by running through the red one or 
-        teleport through the blue and orange one!
+            Use arrow keys to steer Iguana to safety and try to avoid getting eaten!
+            Check out the portal to the shadow world by running through the red one or 
+            teleport through the blue and orange one!
         </div>
         <div class="highscores">
             <div class="overlay"></div>
             <div class="content">
                 <h2>Your score is <span id="cScore"></span></h2>
-
-
-                <h2>Highscores</h2>
-                <table> 
+                <table border="1" align="center">
                     <tr>
-                        <th>Player</th>
-                        <th>Score</th>
+                        <th>User</th>
+                        <th>Highscore</th>
                     </tr>
+
+                    @foreach ($highscore as $hs)
                     <tr>
-                        <td> Bernie</td>
-                        <td> 577 </td>
+                        <td>{{$hs->user->name}}</td>
+                        <td>{{$hs->highscore}}</td>
                     </tr>
+                    @endforeach
 
                 </table>
                 <a id="replayBtn" class="playBTN" href="snake.php">Play again</a>
