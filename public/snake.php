@@ -13,7 +13,10 @@
             <div id="wrapper"></div>
         </canvas>
         <div class="Instructions"><span> Press 'r' to start </span> 
-        Use arrow keys to steer Iguana to safety and try to avoid getting eaten!</div>
+        Use arrow keys to steer Iguana to safety and try to avoid getting eaten!
+        Check out the portal to the shadow world by running through the red one or 
+        teleport through the blue and orange one!
+        </div>
         <div class="highscores">
             <div class="overlay"></div>
             <div class="content">
