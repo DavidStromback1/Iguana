@@ -11,6 +11,7 @@ class CreateHighscoreTable extends Migration
      *
      * @return void
      */
+    
     public function up()
     {
         Schema::create('highscore', function (Blueprint $table) {
