@@ -1,3 +1,6 @@
+# Snake vs Iguana Game!
+Developed by Lucas Vanparijs, Franziska Bernhard, Marciano Geijselaers and David Strömbäck.
+
 # Laravel PHP Framework
 
 [![Build Status](https://travis-ci.org/laravel/framework.svg)](https://travis-ci.org/laravel/framework)
